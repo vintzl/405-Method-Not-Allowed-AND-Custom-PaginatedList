@@ -1,0 +1,53 @@
+@page "/Edit/{id:int}"
+@inject HttpClient Http
+@using api_415.Libs
+
+<h1>Edit Weather forecast</h1>
+@if (forecast == null)
+{
+<p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="@forecast" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Temp. (C)</th>
+            <th>Temp. (F)</th>
+            <th>Summary</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>@forecast.Date.ToShortDateString()</td>
+            <td>@forecast.TemperatureC</td>
+            <td>@forecast.TemperatureF</td>
+            <td><InputText @bind-Value="@forecast.Summary"/></td>
+        </tr>
+        <button class="btn btn-primary" type="submit">Save</button>
+
+    </tbody>
+    </table>
+</EditForm>
+}
+
+
+@code {
+    WeatherForecast forecast;
+    [Parameter]
+    public int Id { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        forecast = await Http.GetJsonAsync<WeatherForecast>($"https://localhost:5003/WeatherForecast/{Id}");
+    }
+    private async Task HandleValidSubmit()
+    {
+        await Http.PostJsonAsync("https://localhost:5003/WeatherForecast/{id}", forecast);
+    }
+}
